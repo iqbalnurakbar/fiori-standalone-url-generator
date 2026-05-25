@@ -46,6 +46,3 @@ The `#Shell-runStandaloneApp` intent was deprecated in UI Add-On for SAP NetWeav
 - [SAP Help - Running a Standalone Application](https://help.sap.com/saphelp_em92/helpdata/de/53/7758e0deb0477386ea400c915073b3/content.htm)
 - [SAP Help - UI Add-On for SAP NetWeaver](https://help.sap.com/docs/UI_ADD-ON_FOR_SAP_NETWEAVER_20/17ae0e97e0fc424a9c368f350c0ba6bd)
 
-## License
-
-MIT
