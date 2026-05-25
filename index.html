@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAP Fiori Standalone App URL Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f6fa;
+      color: #333;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #0a6ed1;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+    .form-group .hint {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #0a6ed1;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .form-row input {
+      flex: 1;
+    }
+    .form-row span {
+      font-weight: bold;
+    }
+    .section-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: 20px 0 10px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #0a6ed1;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .btn:hover { background: #085cad; }
+    .btn-copy {
+      background: #4caf50;
+      margin-left: 8px;
+    }
+    .btn-copy:hover { background: #3d8b40; }
+    .btn-clear {
+      background: #e74c3c;
+      margin-left: 8px;
+    }
+    .btn-clear:hover { background: #c0392b; }
+    .result-section {
+      margin-top: 24px;
+      padding: 16px;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+    }
+    .result-section label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .result-section textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 8px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      resize: vertical;
+    }
+    .copy-feedback {
+      display: none;
+      color: #4caf50;
+      font-size: 0.8rem;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .note {
+      margin-top: 24px;
+      padding: 12px;
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #555;
+    }
+    .note strong { color: #e65100; }
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: #999;
+    }
+    footer a { color: #0a6ed1; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SAP Fiori Standalone App URL Generator</h1>
+    <p class="subtitle">Generate URLs to run SAP Fiori apps in standalone mode (without full Launchpad navigation).</p>
+
+    <form id="urlForm" onsubmit="return false;">
+      <!-- Protocol -->
+      <div class="form-group">
+        <label for="selProtocol">Protocol</label>
+        <div class="hint">HTTP or HTTPS. Use HTTPS for production systems.</div>
+        <select id="selProtocol">
+          <option value="https">https</option>
+          <option value="http">http</option>
+        </select>
+      </div>
+
+      <!-- Server -->
+      <div class="form-group">
+        <label for="txtServer">Server Host</label>
+        <div class="hint">FQDN or IP of your SAP front-end server (e.g. sapserver.company.com).</div>
+        <input id="txtServer" type="text" placeholder="sapserver.company.com" />
+      </div>
+
+      <!-- Port -->
+      <div class="form-group">
+        <label for="txtPort">Port (optional)</label>
+        <div class="hint">ICM HTTP/S port. Leave empty if using default port (443/80).</div>
+        <input id="txtPort" type="text" placeholder="44300" />
+      </div>
+
+      <!-- Launchpad Path -->
+      <div class="form-group">
+        <label for="txtLaunchpad">Launchpad Path</label>
+        <div class="hint">Path to FioriLaunchpad.html on ABAP front-end server. Default works for most systems.</div>
+        <input id="txtLaunchpad" type="text" value="/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html" />
+      </div>
+
+      <!-- Client -->
+      <div class="form-group">
+        <label for="txtClient">SAP Client (optional)</label>
+        <div class="hint">3-digit SAP client number. Leave empty to use the system default client.</div>
+        <input id="txtClient" type="text" placeholder="100" maxlength="3" />
+      </div>
+
+      <!-- Shell Config -->
+      <div class="form-group">
+        <label for="selShellConfig">Shell Configuration</label>
+        <div class="hint"><b>standalone</b> = full shell without home button. <b>headerless</b> = no shell header at all. <b>embedded</b> = for portal integration.</div>
+        <select id="selShellConfig">
+          <option value="standalone">standalone</option>
+          <option value="headerless">headerless</option>
+          <option value="embedded">embedded</option>
+          <option value="">(none)</option>
+        </select>
+      </div>
+
+      <!-- UI5 Component -->
+      <div class="form-group">
+        <label for="txtComponent">SAPUI5 Component</label>
+        <div class="hint">The component name from the app's manifest.json (sap.app/id). e.g. cus.crm.opportunity</div>
+        <input id="txtComponent" type="text" placeholder="cus.crm.opportunity" />
+      </div>
+
+      <!-- App Path (BSP URL) -->
+      <div class="form-group">
+        <label for="txtAppPath">Application URL Path</label>
+        <div class="hint">BSP application path on the server. Find it in /sap/bc/ui5_ui5/sap/&lt;bsp_name&gt; or via SICF.</div>
+        <input id="txtAppPath" type="text" placeholder="/sap/bc/ui5_ui5/sap/crm_opprtnty" />
+      </div>
+
+      <!-- App Parameters -->
+      <div class="section-title">Application Startup Parameters (optional)</div>
+      <div class="form-group">
+        <div class="hint">Key-value pairs passed to the app at startup. Only rows with a value will be included.</div>
+      </div>
+      <div class="form-group form-row">
+        <input id="txtParam1" type="text" placeholder="parameter name" />
+        <span>=</span>
+        <input id="txtVal1" type="text" placeholder="value" />
+      </div>
+      <div class="form-group form-row">
+        <input id="txtParam2" type="text" placeholder="parameter name" />
+        <span>=</span>
+        <input id="txtVal2" type="text" placeholder="value" />
+      </div>
+      <div class="form-group form-row">
+        <input id="txtParam3" type="text" placeholder="parameter name" />
+        <span>=</span>
+        <input id="txtVal3" type="text" placeholder="value" />
+      </div>
+      <div class="form-group form-row">
+        <input id="txtParam4" type="text" placeholder="parameter name" />
+        <span>=</span>
+        <input id="txtVal4" type="text" placeholder="value" />
+      </div>
+      <div class="form-group form-row">
+        <input id="txtParam5" type="text" placeholder="parameter name" />
+        <span>=</span>
+        <input id="txtVal5" type="text" placeholder="value" />
+      </div>
+
+      <!-- Buttons -->
+      <div>
+        <button class="btn" id="btnGenerate" type="button">Generate URL</button>
+        <button class="btn btn-copy" id="btnCopy" type="button">Copy URL</button>
+        <button class="btn btn-clear" id="btnClear" type="button">Clear</button>
+        <span class="copy-feedback" id="copyFeedback">✓ Copied!</span>
+      </div>
+    </form>
+
+    <!-- Result -->
+    <div class="result-section">
+      <label for="txtResult">Generated URL:</label>
+      <textarea id="txtResult" readonly placeholder="Click 'Generate URL' to create the standalone app URL..."></textarea>
+    </div>
+
+    <!-- Note -->
+    <div class="note">
+      <strong>Note:</strong> The <code>#Shell-runStandaloneApp</code> intent was deprecated in newer UI Add-On versions (2.0+). 
+      For systems running UI Add-On for SAP NetWeaver 2.0 or higher, consider using direct intent-based navigation instead. 
+      This tool is still useful for older systems or specific standalone/headerless scenarios.
+      <br><br>
+      <strong>Reference:</strong> 
+      <a href="https://help.sap.com/docs/ABAP_PLATFORM/738e09d24ccb4fc59a4243a83572426c/017c158c1fda4ecd8e39b23641a97d13.html" target="_blank">SAP Help - UI Add-On for SAP NetWeaver</a>
+    </div>
+
+    <footer>
+      SAP Fiori Standalone URL Generator &mdash; Built for ABAP developers maintaining Fiori apps.
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      function generateUrl() {
+        var protocol = document.getElementById("selProtocol").value;
+        var server = document.getElementById("txtServer").value.trim();
+        var port = document.getElementById("txtPort").value.trim();
+        var launchpad = document.getElementById("txtLaunchpad").value.trim();
+        var client = document.getElementById("txtClient").value.trim();
+        var shellConfig = document.getElementById("selShellConfig").value;
+        var component = document.getElementById("txtComponent").value.trim();
+        var appPath = document.getElementById("txtAppPath").value.trim();
+
+        // Validation
+        if (!server) { alert("Please enter the Server Host."); return ""; }
+        if (!component) { alert("Please enter the SAPUI5 Component."); return ""; }
+        if (!appPath) { alert("Please enter the Application URL Path."); return ""; }
+
+        // Build base URL
+        var url = protocol + "://" + server;
+        if (port) { url += ":" + port; }
+        url += launchpad;
+
+        // Query parameters before the hash
+        var queryParams = [];
+        if (client) { queryParams.push("sap-client=" + client); }
+        if (shellConfig) { queryParams.push("sap-ushell-config=" + shellConfig); }
+
+        if (queryParams.length > 0) {
+          url += "?" + queryParams.join("&");
+        }
+
+        // Hash fragment
+        var hashParams = [];
+        hashParams.push("sap-ushell-SAPUI5.Component=" + encodeURIComponent(component));
+        hashParams.push("sap-ushell-url=" + encodeURIComponent(appPath));
+
+        // App-specific parameters
+        for (var i = 1; i <= 5; i++) {
+          var paramName = document.getElementById("txtParam" + i).value.trim();
+          var paramVal = document.getElementById("txtVal" + i).value.trim();
+          if (paramName && paramVal) {
+            hashParams.push(paramName + "=" + encodeURIComponent(paramVal));
+          }
+        }
+
+        url += "#Shell-runStandaloneApp?" + hashParams.join("&");
+
+        return url;
+      }
+
+      document.getElementById("btnGenerate").addEventListener("click", function() {
+        var result = generateUrl();
+        if (result) {
+          document.getElementById("txtResult").value = result;
+        }
+      });
+
+      document.getElementById("btnCopy").addEventListener("click", function() {
+        var textarea = document.getElementById("txtResult");
+        var text = textarea.value;
+        if (!text) {
+          alert("Generate a URL first.");
+          return;
+        }
+        // Use clipboard API if available, fallback to select+copy
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showCopyFeedback();
+          });
+        } else {
+          textarea.select();
+          document.execCommand("copy");
+          showCopyFeedback();
+        }
+      });
+
+      document.getElementById("btnClear").addEventListener("click", function() {
+        document.getElementById("txtServer").value = "";
+        document.getElementById("txtPort").value = "";
+        document.getElementById("txtClient").value = "";
+        document.getElementById("txtComponent").value = "";
+        document.getElementById("txtAppPath").value = "";
+        document.getElementById("selProtocol").value = "https";
+        document.getElementById("selShellConfig").value = "standalone";
+        document.getElementById("txtLaunchpad").value = "/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html";
+        for (var i = 1; i <= 5; i++) {
+          document.getElementById("txtParam" + i).value = "";
+          document.getElementById("txtVal" + i).value = "";
+        }
+        document.getElementById("txtResult").value = "";
+      });
+
+      function showCopyFeedback() {
+        var el = document.getElementById("copyFeedback");
+        el.style.display = "inline";
+        setTimeout(function() { el.style.display = "none"; }, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>
